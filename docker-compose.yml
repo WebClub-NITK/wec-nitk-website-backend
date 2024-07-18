@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+
+    db:
+        image: postgres:14-bookworm
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: $(DATABASE_PASSWORD)
+
+    strapi:
+        build:
+            dockerfile: Dockerfile
+            context: "./wec-nitk-website-backend"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:1337"]
+            interval: 30s
+            timeout: 30s
+            retries: 5
+            start_period: 30s
+            start_interval: 10s
+        depends_on:
+            - db
+        volumes:
+            -   type: bind
+                source: ./wec-nitk-website-backend/public/uploads
+                target: /app/public/uploads
+    
+    frontend:
+        build: 
+            dockerfile: Dockerfile
+            context: "./wec-nitk-website"
+        depends_on:
+            strapi:
+                condition: service_healthy
+                restart: true
+
+    nginx:
+        restart: always
+        build:
+            dockerfile: Dockerfile
+            context: ./nginx
+        ports:
+            - "3050:80"
+
+
