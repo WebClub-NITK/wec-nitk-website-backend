@@ -6,7 +6,9 @@ services:
         image: postgres:14-bookworm
         restart: always
         environment:
-            POSTGRES_PASSWORD: $(DATABASE_PASSWORD)
+            POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+        volumes:
+            -   wec_backend_database:/var/lib/postgresql/data
 
     strapi:
         build:
@@ -44,3 +46,7 @@ services:
             - "3050:80"
 
 
+
+
+volumes:
+    wec_backend_database:
